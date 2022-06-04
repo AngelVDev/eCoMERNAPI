@@ -6,7 +6,7 @@ const {
 } = require("./verifyToken");
 
 const router = require("express").Router();
-
+//UPDATE
 router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
   if (req.body.password) {
     req.body.password = CryptoJS.AES.encrypt(
@@ -27,7 +27,17 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     res.status(500).send(err);
   }
 });
-//GET
+//GET USER
+router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    const { password, ...others } = user._doc;
+    res.status(200).json(...others);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+//GET ALL USERS
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
   const query = req.query.new;
   try {
@@ -36,16 +46,6 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
       : await User.find();
 
     res.status(200).json(users);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
-//GET ALL USERS
-router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    const { password, ...others } = user._doc;
-    res.status(200).json(...others);
   } catch (err) {
     res.status(500).send(err);
   }
